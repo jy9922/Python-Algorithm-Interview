@@ -1,0 +1,560 @@
+### 2부 6장 문자열 조작
+## **유효한 팰린드롬**
+
+주어진 문자열이 팬린드롬인지 확인하는 문제
+
+입력값을 뒤집었을 때 입력값과 비교한 결과, 같으면 true 반환 / 다르면 false 반환
+
+팰린드롬 - 앞뒤가 똑같은 단어나 문장으로, 뒤집어도 같은 말이 되는 단어 또는 문장을 의미함
+
+[https://leetcode.com/problems/valid-palindrome/](https://leetcode.com/problems/valid-palindrome/)
+
+ [Valid Palindrome - LeetCode
+
+Level up your coding skills and quickly land a job. This is the best place to expand your knowledge and get prepared for your next interview.
+
+leetcode.com](https://leetcode.com/problems/valid-palindrome/)
+
+### <내 풀이>
+
+```
+class Solution:
+    def isPalindrome(self, s: str) -> bool:
+        alpha = []
+        for i in s:
+            if i.isalnum():
+                i = i.lower()
+                alpha.append(i)
+        mid = len(alpha)//2
+        alpha_a = alpha[:mid]
+        alpha_b = alpha[mid:]
+        alpha_b.reverse()
+        
+        if len(alpha_b) != len(alpha_a):
+            alpha_b = alpha[:len(alpha_a)]
+        if alpha_a == alpha_b:
+            return True
+        else:
+            return False
+```
+
+문제 조건에 맞게 함수의 문자 및 숫자 여부를 확인해 새로운 리스트에 담았다.
+
+이후 리스트의 중간 길이를 기준으로 두 개의 배열에 각각 문자열을 담아
+
+같으면 true를, 다르면 false를 리턴해주는 코드로 문제를 해결하고자 했다.
+
+사실 문제에 대해 너무 직관적으로 생각했고, 냅다 코드로 구현하려고 했다.
+
+결론적으로 새로운 테스트 케이스에 부합하지 못해 실패하였고,
+
+생각보다 손이 먼저 막연하게 풀어버린 내 코드를 보고 많이 반성했다..ㅜㅡ
+
+### <#풀이 1 - List의 pop( 0 )>
+
+\- 대소문자 여부를 구분하지 않으며 영문자, 숫자만을 대상으로 하는 제약 조건을 해결하기 위해
+
+\- isalnum( )함수를 이용해 새로운 리스트에 append함
+
+\- 다음으로 pop( )함수를 이용하여 재정의한 문자열 리스트의 앞, 뒤를 비교해가면서 True 혹은 False를 리턴
+
+\- 파이썬의 리스트는 pop( ) 함수에서 인덱스를 지정할 수 있기 때문에, pop(0)을 하게 되면 맨 앞의 값을 가져올 수 있음
+
+```
+# isalnum() - 영문자, 숫자 여부를 판별하는 함수
+# 위 문제는 대소문자 여부를 구분하지 않기 때문에 문자 및 숫자 여부를 판별해 소문자로 바꾸고
+# 새로운 변수에 담는 작업이 필요함
+
+def isPalindrome(self, s: str) -> bool:
+	strs = []
+    for char in s:
+    	if char.isalnum():
+        	strs.append(char, lower())
+            
+# 펠린드롬 여부 판별
+
+while len(strs) > 1:
+	if strs.pop(0) != strs.pop():
+    	return False
+return True
+```
+
+### <#풀이 2 - Deque의 popleft( )>
+
+\- **데크(deque)**를 명시적으로 선언하여 속도 개선할 수 있음
+
+\- strs : Deque = collections.deque( ) 자료형 데크로 선언 (64밀리초에 실행됨, 5배 정도의 속도를 높임)
+
+\- 리스트의 pop(0)이 O(n)인데 반해, 데크의 popleft( )는 O(1)임
+
+\- 이를 각각 n번씩 반복하면 리스트의 pop(0)은 O(n^2)
+
+\- 데크의 popleft( )는 O(n)이 됨
+
+```
+def isPalindrome(self, s: str) -> bool:
+	# 자료형 데크로 선언
+    strs: Deque = collections.deque()
+    
+    for char in s:
+    	if char.isalnum():
+        	strs.append(char.lower())
+            
+     while len(strs) > 1:
+     	if strs.popleft() != strs.pop(): #맨앞과 맨뒤 값 꺼내보면서 비교
+        	return False
+     return True
+```
+
+### <#풀이 3 - 슬라이싱 이용>
+
+\- 정규식으로 불필요한 문자를 필터링하고, 문자열을 조작할 수 있는 파이썬의 슬라이싱 이용
+
+\- \[ : : -1\] 을 이용하면 문자열을 뒤집을 수 있음
+
+\- 더 높은 속도로 문제 해결을 할 수 있음 (풀이 2에 비해 약 2배 정도 더 빨라짐)
+
+```
+class Solution:
+    def isPalindrome(self, s: str) -> bool:
+        s = s.lower()
+        # 정규식으로 불필요한 문자 필터링
+        s = re.sub('[^a-z0-9]','',s)
+        
+        return s == s[::-1] #슬라이싱
+```
+
+### \* 문자열 슬라이싱
+
+\- 내부적으로 매우 빠르게 동작함
+
+\- 위치를 지정하면 해당 위치의 배열 포인터를 얻게 되고 이를 통해 연결된 객체를 찾아 실제 값을 찾아냄
+
+\- 대부분의 문자열 작업은 슬라이싱으로 처리하는 편이 가장 빠름
+
+| **0** | **1** | **2** | **3** | **4** |
+| --- | --- | --- | --- | --- |
+| **안** | **녕** | **하** | **세** | **요** |
+| **\-5** | **\-4** | **\-3** | **\-2** | **\-1** |
+
+| **s \[ 1: 4 \]** | 녕하세 | 인덱스 1부터 4 이전까지 |
+| --- | --- | --- |
+| **s \[ 1 : -2 \]**  | 녕하 | 인덱스 1부터 -2 이전까지 |
+| **s \[ 1 : \]** | 녕하세요 | 문자열의 시작 또는 끝 생략 가능 |
+| **s \[ : \]** | 안녕하세요 | 둘 다 생략 - 사본 리턴 |
+| **s \[ 1 : 100\]** | 녕하세요 | 문자열의 최대 길이만큼 표현 |
+| **s\[ -1 \]** | 요 | 마지막 문자 |
+| **s\[ -4 \]** | 녕 | 뒤에서 4번째 |
+| **s\[ : -3 \]** | 안녕 | 뒤에서 3개 글자 앞까지 |
+| **s\[ -3 : \]** | 하세요 | 뒤에서 3번째 문자에서 마지막까지 |
+| **s\[ : : 1\]** | 안녕하세요 | 1은 기본값, 생략 가능 |
+| **s\[ : : -1\]** | 요세하녕안 | 뒤집음 |
+| **s\[ : : 2\]** | 안하요 | 2칸씩 앞으로 이동 |
+
+## **문자열 뒤집기**
+
+문자열을 뒤집는 함수를 작성하는 문제
+
+**[https://leetcode.com/problems/reverse-string/](https://leetcode.com/problems/reverse-string/)**
+
+ [Reverse String - LeetCode
+
+Level up your coding skills and quickly land a job. This is the best place to expand your knowledge and get prepared for your next interview.
+
+leetcode.com](https://leetcode.com/problems/reverse-string/)
+
+### <내 풀이>
+
+```
+class Solution:
+    def reverseString(self, s: List[str]) -> None:
+        s.reverse()
+        print(s)
+```
+
+문자열을 뒤집기 위해 기존에 알고 있었던 reverse 함수를 이용해 문제를 풀었다.
+
+### <#풀이 1 - 투 포인터를 이용한 스왑>
+
+\- 투 포인터 : 단어 그대로 2개의 포인터를 이용해 범위를 조정해가며 풀이하는 방식
+
+\- 범위를 점점 좁혀가면서 스왑하는 형태로 풀이
+
+```
+class Solution:
+    def reverseString(self, s: List[str]) -> None:
+      left, right = 0, len(s) - 1
+      while left < right:
+        s[left], s[right] = s[right], s[left]
+        left += 1
+        right -= 1
+```
+
+### <#풀이 2 - 파이썬 방식>
+
+\- reverse( ) 함수를 사용하는 방식
+
+```
+class Solution:
+    def reverseString(self, s: List[str]) -> None:
+      s.reverse()
+```
+
+## **로그파일 재정렬**
+
+1\. 로그의 가장 앞 부분은 식별자
+
+2\. 문자로 구성된 로그가 숫자 로그보다 앞에 옴
+
+3\. 식별자는 순서에 영향을 끼치지 않지만, 문자가 동일할 경우 식별자 순으로 함
+
+4\. 숫자 로그는 입력순
+
+[https://leetcode.com/problems/reorder-data-in-log-files/](https://leetcode.com/problems/reorder-data-in-log-files/)
+
+ [Reorder Data in Log Files - LeetCode
+
+Level up your coding skills and quickly land a job. This is the best place to expand your knowledge and get prepared for your next interview.
+
+leetcode.com](https://leetcode.com/problems/reorder-data-in-log-files/)
+
+### <내풀이>
+
+```
+class Solution:
+    def reorderLogFiles(self, logs: List[str]) -> List[str]:
+        log_num = []
+        log_lets = []
+
+        for i in logs:
+            if i.split()[1].isdigit():
+                log_num.append(i)
+            else:
+                log_lets.append(i)
+
+        log_lets = sorted(log_lets, key= lambda x: (x.split()[1:],x.split()[0]))
+        return log_lets + log_num
+```
+
+위 조건에 맞게 가장 먼저 숫자로 이루어진 로그인지 문자로 이루어진 로그인지 구분해서 각 리스트에 append 했다.
+
+숫자는 그냥 입력 순으로 설정하면 되기 때문에 냅두고, 문자로 이루어진 로그 부분을 key에 람다식을 대입해 정렬하였다.
+
+### <#풀이 1 - 람다와  + 연산자 이용>
+
+\- 문자로 구성된 로그가 숫자 로그보다 이전에 옴
+
+\- 숫자로그는 입력 순서대로 둠
+
+\- 문자와 숫자를 구분하고 숫자는 나중에 그대로 이어붙임
+
+\- isdigit( )을 이용해서 숫자 여부 판별
+
+\- 숫자 변환 가능 로그는 digits에, 그렇지 않은 경우 모두 letters에 추가
+
+```
+if log.split()[1].isdigit(): #숫자 판별 함수
+	digits.append(log)
+else:
+	digits.append(log)
+```
+
+\- letters에 해당되는 부분은 식별자를 제외한 문자 \[ 1 : \]을 키로 하여 정렬하며,
+
+\- 동일한 경우 후순위로 식별자 \[0\]을 지정해 정렬되도록 함
+
+```
+letters.sort(key=lambda x: (x.split()[1:], x.split()[0]))
+```
+
+\- \+ 연산자를 이용해 이어 붙여서 리턴함
+
+```
+return letters + digits
+```
+
+```
+class Solution:
+    def reorderLogFiles(self, logs: List[str]) -> List[str]:
+        letters, digits = [], []
+        for log in logs:
+            if log.split()[1].isdigit():
+                digits.append(i)
+            else:
+                letters.append(i)
+                
+		# 2개의 키를 람다 표현식으로 정렬
+        letters.sort(key=lambda x: (x.split()[1:], x.split()[0]))
+        return letters + digits
+```
+
+#### 추가 ) + 연산자
+
+```
+a = [1, 2, 3]
+b = [3, 4, 5]
+
+a + b
+[1, 2, 3, 4, 5, 6]
+
+b + a
+[4, 5, 6, 1, 2, 3]
+```
+
+#### 추가 ) 람다 표현식
+
+\- 식별자 없이 실행 가능한 함수
+
+\- 함수 선언 없이도 하나의 식으로 함수를 단순하게 표현 가능
+
+\- 람다 표현식은 코드가 길어지고 map이나 filter와 함께 섞어서 사용하기 시작하면 가독성이 매우 떨어질 수 있음
+
+```
+s = ['2 A', '1 B', '4 C', '1 A']
+
+# 그냥 sorted 함수 사용한 경우
+
+sorted(s)
+
+# 결과 : ['1A', '1B', '2A', '4C']
+
+==========================================
+
+# 직접 함수 선언을 한 방법
+
+def func(x):
+	return x.split()[1], x.split()[0]
+s.sort(key=func)
+
+# 결과 : ['1A', '2A', '1B', '4C']
+
+===========================================
+
+# 람다 표현식 사용하는 경우
+
+s.sort(key=lambda x: (x.split()[1:], x.split()[0]))
+
+# 결과 : ['1A', '2A', '1B', '4C']
+```
+
+## **가장 흔한 단어**
+
+금지된 단어를 제외한 가장 흔하게 등장하는 단어 출력 문제
+
+대소문자 구분X, 구두점(마침표 또는 쉼표) 또한 무시함
+
+[https://leetcode.com/problems/most-common-word/](https://leetcode.com/problems/most-common-word/)
+
+ [Most Common Word - LeetCode
+
+Level up your coding skills and quickly land a job. This is the best place to expand your knowledge and get prepared for your next interview.
+
+leetcode.com](https://leetcode.com/problems/most-common-word/)
+
+### <내 풀이>
+
+```
+import re
+from collections import Counter
+
+class Solution:
+    def mostCommonWord(self, paragraph: str, banned: List[str]) -> str:
+        paragraph = paragraph.lower()
+
+        paragraph = re.sub('[^A-Za-z0-9 ]',' ', paragraph)
+        a = list(paragraph.split())
+
+        li = [i for i in a if i not in banned]
+        d = Counter(li)
+        result = [k for k,v in d.items() if max(d.values()) == v]
+        
+        return result[0]
+```
+
+먼저 정규표현식을 이용해 구두점과 마침표에 해당되는 부분을 탭으로 바꾸었다.
+
+이후 split( )을 통해 리스트에 담았다.
+
+그리고 banned 함수에 있는 지 없는 지 유무를 확인하고 없으면 새로운 리스트에 담았다.
+
+최종적으로 Counter 객체를 이용해 각 단어마다 등장 빈도를 확인하였고,
+
+그 중 가장 큰  value값을 가지는 key값을 리턴하였다.
+
+### <#풀이 1 - 리스트 컴프리헨션, Counter 객체 사용>
+
+\- 입력값에 대소문자가 섞여 있으며 쉽표 등 구두점이 존재
+
+\- 입력값에 대한 전처리 진행 (정규식 사용)
+
+```
+words = [word for word in re.sub(r'[^\w]', ' ', paragraph).lower().split() if word not in banned]
+```
+
+\- 정규식에서 \\w는 단어 문자를 뜻하며, ^는 not을 의미함
+
+\- 단어 문자가 아닌 모든 문자를 공백으로 치환함
+
+\- 또다른 조건으로 banned에 포함되지 않은 단어를 대상을 words에 저장
+
+\- words에는 소문자, 구두점을 제외하고 banned를 제외한 단어 목록이 저장됨
+
+\- Counter 객체를 이용해 각 단어의 개수 세기
+
+```
+# defaultdic 이용
+counts = collections.defaultdict(int)
+for word in words:
+	counts[word] += 1
+	return max(counts, key=counts.get)
+    
+# Counter 모듈 이용
+# most_common (가장 많이 등장하는 단어)
+counts = collctions.Counter(words)
+return counts.most_common(1)[0][0]
+```
+
+```
+import re
+from collections import Counter
+
+class Solution:
+    def mostCommonWord(self, paragraph: str, banned: List[str]) -> str:
+        words = [word for word in re.sub(r'[^\w]', ' ', paragraph).lower().split() if word not in banned]
+        
+        counts = collections.Counter(words)
+        # 가장 흔하게 등장하는 단어의 첫 번째 인덱스 리턴
+        return counts.most_common(1)[0][0]
+```
+
+## **그룹 애너그램**
+
+문자열 배열을 받아 애너그램 단위로 그룹핑
+
+[https://leetcode.com/problems/group-anagrams/](https://leetcode.com/problems/group-anagrams/)
+
+ [Group Anagrams - LeetCode
+
+Level up your coding skills and quickly land a job. This is the best place to expand your knowledge and get prepared for your next interview.
+
+leetcode.com](https://leetcode.com/problems/group-anagrams/)
+
+### <내 풀이>
+
+```
+class Solution:
+    def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
+      anagram = collections.defaultdict(list)
+    
+      for i in strs:
+        a = ''.join(sorted(i))
+        anagram[a].append(i)
+        
+      return list(anagram.values())
+```
+
+처음에는 해당 부분 문자열을 하나씩 추출해 문자 재정렬을 하였고,
+
+기존 문자열이 저장되어야 되므로 딕셔너리에 문자열이 같은 부분에 기존의 문자를 저장하는 방식으로 문제를 풀었다.
+
+일반 딕셔너리를 이용해서 풀이를 하다 일부 테스트 케이스에 오류가 생겨 디폴트를 생성해주는 defaultdict를 이용해 풀었다.
+
+### <#풀이 1 - 정렬하여 딕셔너리에 추가>
+
+\- 정렬하여 비교
+
+\- sorted( )는 문자열도 잘 정렬하며 결과를 리스트 형태로 리턴함
+
+\- 이를 키로 사용하기 위해 join( )으로 합쳐 이 값을 키로 하는 딕셔너리로 구현
+
+\- 파이썬 딕셔너리는  키/값 해시 테이블 자료형임
+
+\- 정렬한 값을 키로하여 딕셔너리에 추가
+
+\- 존재하지 않는 키를 삽입하려할 경우 KeyError가 발생하므로,
+
+\- 에러가 나지 않도록 디폴트를 생성해주는 defaultdict( )로 선언(매번 키 존재 여부를 체크하지 않고 비교 구문을 생략해 간결하게 구성함)
+
+```
+class Solution:
+    def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
+      anagrams = collections.defaultdict(list)
+    
+      for word in strs:
+        anagrams[''.join(sorted(word))].append(word)
+        
+      return list(anagrams.values())
+```
+
+#### 추가 ) + 여러 가지 정렬 방법
+
+\- 파이썬에서 시작된 고성능 정렬 알고리즘인 팀소트
+
+#### **sorted( )**
+
+\- 숫자 뿐만 아니라 문자도 정렬
+
+\- key= 옵션을 지정해 정렬을 위한 키 또는 함수를 별도로 지정함
+
+```
+# sorted()와 join()
+
+b = 'zbdaf'
+''.join(sorted(b))
+
+# 출력: 'abdfz'
+
+======================================
+
+# 길이 기준으로 정렬
+c = ['ccc', 'aaaa', 'd', 'bb']
+sorted(c, key=len)
+
+# 출력: ['d', 'bb', 'ccc', 'aaaa']
+
+======================================
+
+# 첫 문자열 s[0]과 마지막 문자열 s[-1] 순으로 정렬
+c = ['cde', 'cfc', 'abc']
+def fn(s):
+	return s[0], s[-1]
+print(sorted(a, key=fn)
+
+# 출력: ['abc', 'cfc', 'cde']
+
+=====================================
+
+# 람다 표현식 사용
+c = ['cde', 'cfc', 'abc']
+sorted(a, key=lambda s: (s[0], s[-1])
+
+# 출력: ['abc', 'cfc', 'cde']
+```
+
+#### **sort( ) 메소드와 sorted( ) 함수**
+
+| sort( ) 메소드 | Sort( ) 메소드 |
+| --- | --- |
+| \- 리스트 자체를 정렬, 제자리 정렬   \- 입력을 출력으로 덮어씀, 별도의 추가 공간 필요X, 리턴값이 X | \- 별도의 리턴값이 존재 |
+
+```
+alist.sort() # sort() 리스트 자체를 제자리 정렬
+alist = blist.sort() # 잘못된 구문
+					 # sort()함수는 None을 리턴하므로 주의 필요
+```
+
+#### **정렬 알고리즘별 시간 복잡도**
+
+|   | 최선 | 평균 | 최악 |
+| --- | --- | --- | --- |
+| 퀵 정렬 | n log n | n log n | n^2 |
+| 병합 정렬 | n log n | n log n | n log n |
+|  팀소트 | n | n log n | n log n |
+
+\- 퀵 정렬은 빠른 알고리즘이긴 하나 최악의 경우 O(n^2)가 될 수 있음
+
+\- 병합 정렬은 항상 일정한 속도를 보이지만 O(n log n) 이상 빠르게 처리할 수 없음
+
+## **가장 긴 팰린드롬 부분 문자열**
+
+가장 긴 팰린드롬 부분 문자열 출력
